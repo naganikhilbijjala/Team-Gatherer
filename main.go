@@ -27,9 +27,17 @@ func main() {
 	// Define the routes
 	r.POST("/teams", createTeam)
 	r.GET("/teams", getTeams)
+	r.POST("/players", createPlayer)
+	r.GET("/players", getPlayers)
 
 	// Start the server
 	r.Run(":8080")
+}
+
+type Player struct {
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	TeamID int    `json:"team_id"`
 }
 
 type Team struct {
@@ -85,4 +93,68 @@ func getTeams(c *gin.Context) {
 		teams = append(teams, team)
 	}
 	c.JSON(http.StatusOK, teams)
+}
+
+func createPlayer(c *gin.Context) {
+	var player Player
+	if err := c.ShouldBindJSON(&player); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
+		return
+	}
+
+	// Check if the team exists
+	var ID int
+	err := db.QueryRow("SELECT id FROM teams WHERE id = ?", player.TeamID).Scan(&ID)
+	log.Println(player.TeamID)
+	log.Println(ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Team not found"})
+			return
+		}
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error, Team Not Found"})
+		return
+	}
+
+	result, err := db.Exec("INSERT INTO players (name, team_id) VALUES (?, ?)", player.Name, player.TeamID)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error, Player not inserted"})
+		return
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	player.ID = int(id)
+	c.JSON(http.StatusCreated, player)
+}
+
+func getPlayers(c *gin.Context) {
+	rows, err := db.Query("SELECT * FROM players")
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+	defer rows.Close()
+
+	players := []Player{}
+	for rows.Next() {
+		var player Player
+		err := rows.Scan(&player.ID, &player.Name, &player.TeamID)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+		players = append(players, player)
+	}
+	c.JSON(http.StatusOK, players)
 }
