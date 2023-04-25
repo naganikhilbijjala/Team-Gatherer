@@ -13,4 +13,3 @@ Instructions to run the code
    2. To import mysql data first login to your mysql and create a database then use the command `mysql -u username -p your_database_name < dumpfilename.sql` to import the data into db
    3. Change the user name and password and the database name as defined in your system
    4. To run the backend, go to backend folder and run the command `go run .\main.go`
-
