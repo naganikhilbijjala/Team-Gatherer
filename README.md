@@ -1,6 +1,13 @@
 # Team Gatherer
 
-Instructions to run the code
+
+## Overview:
+Finding teammates for specific games and coordinating playtimes can often be a challenging task. Enter Team Gatherer, a solution designed to streamline this process. With Team Gatherer, you have the ability to create a game, specifying important details such as its name, scheduled time, required number of players, and the designated location where the game is going to be played. Once listed on the platform, the game becomes visible to other users, complete with a convenient "join" button. Interested users can easily join games that align with their preferences, as long as the player limit has not been reached. This approach simplifies the difficult task of finding suitable teammates for gaming sessions.
+
+## Tech Stack:
+We used React for the frontend, GoLang for the backend, and MySQL to store all the information.
+
+Instructions to setup the project
 
 ## Frontend Setup
 1. Go to Frontend folder and run the following commands
